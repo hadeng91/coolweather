@@ -1,9 +1,13 @@
 package com.example.coolweather;
 
+import android.Manifest;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,6 +19,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
+import com.baidu.location.LocationClient;
+import com.baidu.location.LocationClientOption;
 import com.bumptech.glide.Glide;
 import com.example.coolweather.gson.DailyForecast;
 import com.example.coolweather.gson.HourForecast;
@@ -40,6 +48,11 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
+
+    public LocationClient mLocationClient;
+
+    public String mCity;
+
     private ImageView bingPicImg;
 
     private ScrollView weatherLayout;
@@ -72,13 +85,33 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
-        if (Build.VERSION.SDK_INT >= 21) {
+        /*if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
                     View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }*/
+        //badilbs
+        mLocationClient = new LocationClient(getApplicationContext());
+        mLocationClient.registerLocationListener(new MyLocationListener());
+        List<String> permissionList = new ArrayList<>();
+        if (ContextCompat.checkSelfPermission(WeatherActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
         }
+        if (ContextCompat.checkSelfPermission(WeatherActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.READ_PHONE_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(WeatherActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (!permissionList.isEmpty()) {
+            String [] permissions = permissionList.toArray(new String[permissionList.size()]);
+            ActivityCompat.requestPermissions(WeatherActivity.this, permissions, 1);
+        } else {
+            requestLocation();
+        }
+
         bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         weatherLayout = (ScrollView) findViewById(R.id.weather_layout);
         tempText = (TextView) findViewById(R.id.temp_text);
@@ -94,8 +127,7 @@ public class WeatherActivity extends AppCompatActivity {
         dailyForcastLayout = (LinearLayout) findViewById(R.id.daily_forecast_layout);
         suggestionLayout = (LinearLayout) findViewById(R.id.suggestion_layout);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-
+        /*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         if (weatherString != null) {
             Weather weather = Utility.handleJDWeatherResponse(weatherString);
@@ -104,13 +136,15 @@ public class WeatherActivity extends AppCompatActivity {
             String cityID = "111";
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(cityID);
-        }
-        String bingPic = prefs.getString("bing_pic", null);
+        }*/
+
+        /*String bingPic = prefs.getString("bing_pic", null);
         if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bingPicImg);
         } else {
             loadBingPic();
-        }
+        }*/
+        //loadBingPic();
 
         
     }
@@ -137,8 +171,8 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
-    private void requestWeather(String cityID) {
-        String weatherUrl = "https://way.jd.com/jisuapi/weather?cityid="+cityID+
+    private void requestWeather(String city) {
+        String weatherUrl = "https://way.jd.com/jisuapi/weather?city="+city+
         "&appkey=8c6b950a4d6ba13ecf492be439c6be19";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
             @Override
@@ -282,4 +316,44 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
 
+    public class MyLocationListener implements BDLocationListener {
+        @Override
+        public void onReceiveLocation(BDLocation bdLocation) {
+            mCity = bdLocation.getDistrict();
+            requestWeather(mCity);
+        }
+    }
+
+    private void requestLocation() {
+        initLocation();
+        mLocationClient.start();
+    }
+
+    private void initLocation() {
+        LocationClientOption option = new LocationClientOption();
+        option.setIsNeedAddress(true);
+        mLocationClient.setLocOption(option);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0) {
+                    for (int result : grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+                    }
+                    requestLocation();
+                } else {
+                    Toast.makeText(this, "", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            default:
+        }
+    }
 }
