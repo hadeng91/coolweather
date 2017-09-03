@@ -17,12 +17,23 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.coolweather.gson.DailyForecast;
+import com.example.coolweather.gson.HourForecast;
 import com.example.coolweather.gson.Suggestion;
 import com.example.coolweather.gson.Weather;
 import com.example.coolweather.util.HttpUtil;
 import com.example.coolweather.util.Utility;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -53,16 +64,19 @@ public class WeatherActivity extends AppCompatActivity {
 
     private LinearLayout suggestionLayout;
 
+    private LinearLayout hourForecastLayout;
+
+    private LineChart hourLineChart;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
-        if(Build.VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT >= 21) {
             View decorView = getWindow().getDecorView();
             decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_FULLSCREEN
-                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-            );
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
@@ -75,6 +89,8 @@ public class WeatherActivity extends AppCompatActivity {
         windPowerText = (TextView) findViewById(R.id.windpower_text);
         humidityText = (TextView) findViewById(R.id.humidity_text);
         pressureText = (TextView) findViewById(R.id.pressure_text);
+        hourForecastLayout = (LinearLayout) findViewById(R.id.hour_forecast_layout);
+        hourLineChart = (LineChart) findViewById(R.id.hour_line_chart);
         dailyForcastLayout = (LinearLayout) findViewById(R.id.daily_forecast_layout);
         suggestionLayout = (LinearLayout) findViewById(R.id.suggestion_layout);
 
@@ -89,13 +105,14 @@ public class WeatherActivity extends AppCompatActivity {
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(cityID);
         }
-
         String bingPic = prefs.getString("bing_pic", null);
         if (bingPic != null) {
             Glide.with(this).load(bingPic).into(bingPicImg);
         } else {
             loadBingPic();
         }
+
+        
     }
 
     private void loadBingPic() {
@@ -192,6 +209,10 @@ public class WeatherActivity extends AppCompatActivity {
 
             dailyForcastLayout.addView(view);
         }
+
+        LineData mLineData = getLineData(weather.hourForecasts);
+        showChart(hourLineChart, mLineData);
+
         suggestionLayout.removeAllViews();
         for (Suggestion suggestion : weather.suggestions) {
             View view = LayoutInflater.from(this).inflate(R.layout.suggestion_item,
@@ -207,4 +228,58 @@ public class WeatherActivity extends AppCompatActivity {
         weatherLayout.setVisibility(View.VISIBLE);
 
     }
+
+    private LineData getLineData(List<HourForecast> hourForecasts) {
+        ArrayList<String> xValues = new ArrayList<String>();
+        //x轴
+        for (int i = 0; i < hourForecasts.size(); i++) {
+            HourForecast hf = hourForecasts.get(i);
+            xValues.add(hf.time);
+        }
+        //y轴
+        ArrayList<Entry> yValues = new ArrayList<Entry>();
+        for (int i = 0; i < hourForecasts.size(); i++) {
+            HourForecast hf = hourForecasts.get(i);
+            int value = hf.temp;
+            yValues.add(new Entry(value, i));
+
+        }
+        LineDataSet lineDataSet = new LineDataSet(yValues, "");
+        lineDataSet.setColor(Color.BLUE);
+        lineDataSet.setHighlightEnabled(true);
+        lineDataSet.setValueTextColor(Color.BLACK);
+        lineDataSet.setValueTypeface(null);
+        lineDataSet.setFillAlpha(100);
+        //lineDataSet.setValueFormatter
+
+        ArrayList<LineDataSet> lineDataSets = new ArrayList<>();
+        lineDataSets.add(lineDataSet);
+        LineData lineData = new LineData(xValues, lineDataSets);
+        lineData.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float v, Entry entry, int i, ViewPortHandler viewPortHandler) {
+                int res = (int) v;
+                return res+"";
+            }
+
+        });
+        return lineData;
+    }
+
+    private void showChart(LineChart lineChart, LineData lineData) {
+        lineChart.setData(lineData);
+        lineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        lineChart.setDescription("温度");//设置图表描述的内容位置，字体等等
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getAxisLeft().setEnabled(false);
+        lineChart.setTouchEnabled(true);
+        lineChart.setDragEnabled(true);
+        lineChart.setVisibleXRange(1, 6);
+        lineChart.moveViewToX(1);
+        lineChart.getLegend().setEnabled(false);
+        //lineChart.setBackgroundColor(Color.rgb(42,42,36));
+
+    }
+
+
 }
