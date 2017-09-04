@@ -8,6 +8,7 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -31,7 +32,6 @@ import com.example.coolweather.gson.Weather;
 import com.example.coolweather.util.HttpUtil;
 import com.example.coolweather.util.Utility;
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
@@ -40,7 +40,9 @@ import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ViewPortHandler;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.Call;
@@ -48,6 +50,8 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
+
+    public SwipeRefreshLayout swipeRefresh;
 
     public LocationClient mLocationClient;
 
@@ -81,6 +85,8 @@ public class WeatherActivity extends AppCompatActivity {
 
     private LineChart hourLineChart;
 
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +118,9 @@ public class WeatherActivity extends AppCompatActivity {
             requestLocation();
         }
 
+        swipeRefresh = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh);
+        swipeRefresh.setColorSchemeResources(R.color.colorPrimary);
+
         bingPicImg = (ImageView) findViewById(R.id.bing_pic_img);
         weatherLayout = (ScrollView) findViewById(R.id.weather_layout);
         tempText = (TextView) findViewById(R.id.temp_text);
@@ -127,6 +136,14 @@ public class WeatherActivity extends AppCompatActivity {
         dailyForcastLayout = (LinearLayout) findViewById(R.id.daily_forecast_layout);
         suggestionLayout = (LinearLayout) findViewById(R.id.suggestion_layout);
 
+        swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if (mCity != null) {
+                    requestWeather(mCity);
+                }
+            }
+        });
         /*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString = prefs.getString("weather", null);
         if (weatherString != null) {
@@ -181,7 +198,8 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,
-                                "加载失败", Toast.LENGTH_SHORT).show();
+                                "获取天气信息失败", Toast.LENGTH_SHORT).show();
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
             }
@@ -203,6 +221,7 @@ public class WeatherActivity extends AppCompatActivity {
                             Toast.makeText(WeatherActivity.this,
                                     "获取信息失败", Toast.LENGTH_SHORT).show();
                         }
+                        swipeRefresh.setRefreshing(false);
                     }
                 });
             }
@@ -211,10 +230,11 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     private void showWeatherInfo(Weather weather) {
+
         int temp = weather.basic.temperature;
         String cityName = weather.basic.cityName;
         String weahterString = weather.basic.weather;
-        String updateTime = weather.basic.updateTime.split(" ")[1];
+        //String updateTime = weather.basic.updateTime.split(" ")[1];
         String windiDir = weather.basic.windDirect;
         String windPower = weather.basic.windPower;
         int humidity = weather.basic.humidity;
@@ -222,7 +242,7 @@ public class WeatherActivity extends AppCompatActivity {
         tempText.setText(temp+"");
         cityNameText.setText(cityName);
         weatherText.setText(weahterString);
-        updateTimeText.setText(updateTime);
+        updateTimeText.setText(sdf.format(new Date()).split(" ")[1]);
         windDirectText.setText(windiDir);
         windPowerText.setText(windPower);
         pressureText.setText(pressure+"");
