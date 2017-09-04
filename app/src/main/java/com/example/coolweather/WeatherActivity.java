@@ -234,19 +234,18 @@ public class WeatherActivity extends AppCompatActivity {
         int temp = weather.basic.temperature;
         String cityName = weather.basic.cityName;
         String weahterString = weather.basic.weather;
-        //String updateTime = weather.basic.updateTime.split(" ")[1];
         String windiDir = weather.basic.windDirect;
         String windPower = weather.basic.windPower;
         int humidity = weather.basic.humidity;
         int pressure = weather.basic.pressure;
-        tempText.setText(temp+"");
+        tempText.setText(temp + "℃");
         cityNameText.setText(cityName);
         weatherText.setText(weahterString);
         updateTimeText.setText(sdf.format(new Date()).split(" ")[1]);
         windDirectText.setText(windiDir);
         windPowerText.setText(windPower);
         pressureText.setText(pressure+"");
-        humidityText.setText(humidity+"");
+        humidityText.setText(humidity + "%");
         dailyForcastLayout.removeAllViews();
         for (DailyForecast df : weather.dailyForecasts) {
             View view = LayoutInflater.from(this).inflate(R.layout.daily_forecast_item,
@@ -258,8 +257,8 @@ public class WeatherActivity extends AppCompatActivity {
 
             dateText.setText(df.date);
             infoText.setText(df.dayWeather);
-            maxText.setText(df.tempHigh+"");
-            minText.setText(df.tempLow+"");
+            maxText.setText(df.tempHigh + "℃");
+            minText.setText(df.tempLow + "℃");
 
             dailyForcastLayout.addView(view);
         }
@@ -313,9 +312,8 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public String getFormattedValue(float v, Entry entry, int i, ViewPortHandler viewPortHandler) {
                 int res = (int) v;
-                return res+"";
+                return res + "℃";
             }
-
         });
         return lineData;
     }
