@@ -140,7 +140,7 @@ public class ChooseAreaFragment extends Fragment {
                 cityInfoStack.push(seletedCityInfo);
                 updateUI(seletedCityInfo.getCityName(), View.VISIBLE);
             } else {
-                if (getActivity() instanceof WeatherActivity) {
+                /*if (getActivity() instanceof WeatherActivity) {
                     WeatherActivity activity = (WeatherActivity) getActivity();
                     String cityName = seletedCityInfo.getCityName();
                     activity.drawerLayout.closeDrawers();
@@ -148,7 +148,7 @@ public class ChooseAreaFragment extends Fragment {
                     activity.mCity = cityName;
                     activity.requestWeather(cityName);
 
-                }
+                }*/
             }
         }
 
