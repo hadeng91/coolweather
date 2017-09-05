@@ -8,12 +8,14 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.webkit.URLUtil;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -49,7 +51,13 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends AppCompatActivity implements View.OnClickListener {
+
+    public DrawerLayout drawerLayout;
+
+    public Button menuButton;
+
+    public Button settingButton;
 
     public SwipeRefreshLayout swipeRefresh;
 
@@ -98,6 +106,13 @@ public class WeatherActivity extends AppCompatActivity {
                             | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }*/
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        menuButton = (Button) findViewById(R.id.menu_button);
+        settingButton = (Button) findViewById(R.id.setting_button);
+        menuButton.setOnClickListener(this);
+        settingButton.setOnClickListener(this);
+
         //badilbs
         mLocationClient = new LocationClient(getApplicationContext());
         mLocationClient.registerLocationListener(new MyLocationListener());
@@ -188,7 +203,7 @@ public class WeatherActivity extends AppCompatActivity {
         });
     }
 
-    private void requestWeather(String city) {
+    public void requestWeather(String city) {
         String weatherUrl = "https://way.jd.com/jisuapi/weather?city="+city+
         "&appkey=8c6b950a4d6ba13ecf492be439c6be19";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
@@ -331,6 +346,21 @@ public class WeatherActivity extends AppCompatActivity {
         lineChart.getLegend().setEnabled(false);
         //lineChart.setBackgroundColor(Color.rgb(42,42,36));
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.menu_button:
+                //Toast.makeText(getApplicationContext(), "menu city", Toast.LENGTH_SHORT).show();
+                drawerLayout.openDrawer(GravityCompat.START);
+                break;
+            case R.id.setting_button:
+                Toast.makeText(getApplicationContext(), "settings", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                break;
+        }
     }
 
 

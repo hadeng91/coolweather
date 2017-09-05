@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/menu_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="15dp"
+        android:layout_alignParentLeft="true"
+        android:background="@drawable/ic_menu" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_margin="15dp">
+
+        android:layout_centerInParent="true"
+        android:layout_weight="1">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/temp_text"
-            android:layout_gravity="left"
+            android:layout_gravity="center_horizontal"
             android:textSize="60sp"
             android:textColor="#fff"
             android:text="29"/>
@@ -49,4 +58,14 @@
                 android:text="22:12"/>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
+    <Button
+        android:id="@+id/setting_button"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_margin="15dp"
+        android:layout_alignParentRight="true"
+        android:background="@drawable/ic_settings" />
+
+
+</RelativeLayout>

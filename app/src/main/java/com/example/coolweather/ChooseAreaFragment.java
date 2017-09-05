@@ -139,8 +139,16 @@ public class ChooseAreaFragment extends Fragment {
             if (queryResult.size() > 0) {
                 cityInfoStack.push(seletedCityInfo);
                 updateUI(seletedCityInfo.getCityName(), View.VISIBLE);
+            } else {
+                if (getActivity() instanceof WeatherActivity) {
+                    WeatherActivity activity = (WeatherActivity) getActivity();
+                    String cityName = seletedCityInfo.getCityName();
+                    activity.drawerLayout.closeDrawers();
+                    activity.swipeRefresh.setRefreshing(true);
+                    activity.mCity = cityName;
+                    activity.requestWeather(cityName);
 
-
+                }
             }
         }
 
@@ -154,7 +162,6 @@ public class ChooseAreaFragment extends Fragment {
         cacheCityInfos.addAll(queryResult);
         Log.i(TAG,"query size: " + queryResult.size());
         for (CityInfo province : queryResult) {
-            //Log.i(TAG,province.getCityName());
             dataList.add(province.getCityName());
         }
         Log.i(TAG,"data size: " + dataList.size());
