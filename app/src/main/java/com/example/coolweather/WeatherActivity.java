@@ -1,18 +1,17 @@
 package com.example.coolweather;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -45,7 +44,10 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -53,7 +55,7 @@ import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity implements View.OnClickListener {
 
-    public DrawerLayout drawerLayout;
+    private String TAG = "WeatherActivity";
 
     public Button menuButton;
 
@@ -63,7 +65,9 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
 
     public LocationClient mLocationClient;
 
-    public String mCity;
+    public String mCity = "海淀区";
+
+    public Set<String> citySet;
 
     private ImageView bingPicImg;
 
@@ -107,7 +111,6 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }*/
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         menuButton = (Button) findViewById(R.id.menu_button);
         settingButton = (Button) findViewById(R.id.setting_button);
         menuButton.setOnClickListener(this);
@@ -159,8 +162,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                 }
             }
         });
-        /*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String weatherString = prefs.getString("weather", null);
+        //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        /*String weatherString = prefs.getString("weather", null);
         if (weatherString != null) {
             Weather weather = Utility.handleJDWeatherResponse(weatherString);
             showWeatherInfo(weather);
@@ -177,6 +180,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
             loadBingPic();
         }*/
         //loadBingPic();
+        //fortest
+        requestWeather(mCity);
 
         
     }
@@ -227,10 +232,16 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
                     @Override
                     public void run() {
                         if (weather != null) {
-                            /*SharedPreferences.Editor editot = PreferenceManager.
-                                    getDefaultSharedPreferences(WeatherActivity.this).edit();
-                            editot.putString("weather", responseText);
-                            editot.apply();*/
+                            //城市list
+                            SharedPreferences preferences = PreferenceManager.
+                                    getDefaultSharedPreferences(WeatherActivity.this);
+                            SharedPreferences.Editor editor = preferences.edit();
+                            citySet = new HashSet<String>(preferences.getStringSet(
+                                    "cities", new HashSet<String>()
+                            ));
+                            citySet.add(mCity);
+                            editor.putStringSet("cities", citySet);
+                            editor.apply();
                             showWeatherInfo(weather);
                         } else {
                             Toast.makeText(WeatherActivity.this,
@@ -353,7 +364,8 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         switch (view.getId()) {
             case R.id.menu_button:
                 //Toast.makeText(getApplicationContext(), "menu city", Toast.LENGTH_SHORT).show();
-                drawerLayout.openDrawer(GravityCompat.START);
+                Intent intent = new Intent(WeatherActivity.this, CityManagerActivity.class);
+                startActivity(intent);
                 break;
             case R.id.setting_button:
                 Toast.makeText(getApplicationContext(), "settings", Toast.LENGTH_SHORT).show();
@@ -368,7 +380,7 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         @Override
         public void onReceiveLocation(BDLocation bdLocation) {
             mCity = bdLocation.getDistrict();
-            requestWeather(mCity);
+            //requestWeather(mCity);
         }
     }
 

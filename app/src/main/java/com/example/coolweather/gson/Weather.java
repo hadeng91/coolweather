@@ -22,4 +22,14 @@ public class Weather {
         this.hourForecasts = hourForecasts;
         this.suggestions = suggestions;
     }
+
+    @Override
+    public String toString() {
+        return "Weather{" +
+                "basic=" + basic +
+                ", dailyForecasts=" + dailyForecasts +
+                ", hourForecasts=" + hourForecasts +
+                ", suggestions=" + suggestions +
+                '}';
+    }
 }

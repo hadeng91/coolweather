@@ -2,7 +2,10 @@ package com.example.coolweather;
 
 
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -21,7 +24,9 @@ import com.example.coolweather.util.Utility;
 import org.litepal.crud.DataSupport;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -33,12 +38,6 @@ import okhttp3.Response;
 public class ChooseAreaFragment extends Fragment {
 
     private static final String TAG = "ChooseAreaFragment";
-
-    public static final int LEVEL_PROVINCE = 0;
-
-    public static final int LEVEL_CITY = 1;
-
-    public static final int LEVEL_COUNTY = 2;
 
     private ProgressDialog progressDialog;
 
@@ -61,6 +60,8 @@ public class ChooseAreaFragment extends Fragment {
     private CityInfo seletedCityInfo;
 
     private Stack<CityInfo> cityInfoStack = new Stack<>();
+
+    public Set<String> citySet;
 
     public ChooseAreaFragment() {
         // Required empty public constructor
@@ -140,15 +141,21 @@ public class ChooseAreaFragment extends Fragment {
                 cityInfoStack.push(seletedCityInfo);
                 updateUI(seletedCityInfo.getCityName(), View.VISIBLE);
             } else {
-                /*if (getActivity() instanceof WeatherActivity) {
-                    WeatherActivity activity = (WeatherActivity) getActivity();
+                if (getActivity() instanceof MainActivity) {
+                    MainActivity mainActivity = (MainActivity) getActivity();
                     String cityName = seletedCityInfo.getCityName();
-                    activity.drawerLayout.closeDrawers();
-                    activity.swipeRefresh.setRefreshing(true);
-                    activity.mCity = cityName;
-                    activity.requestWeather(cityName);
-
-                }*/
+                    SharedPreferences preferences = PreferenceManager.
+                            getDefaultSharedPreferences(getContext());
+                    SharedPreferences.Editor editor = preferences.edit();
+                    citySet = new HashSet<String>(preferences.getStringSet(
+                            "cities", new HashSet<String>()
+                    ));
+                    citySet.add(cityName);
+                    editor.putStringSet("cities", citySet);
+                    editor.commit();
+                    Intent intent = new Intent(mainActivity, CityManagerActivity.class);
+                    startActivity(intent);
+                }
             }
         }
 

@@ -50,7 +50,7 @@ public class Utility {
     public static Weather handleJDWeatherResponse(String responseContent) {
         if (!TextUtils.isEmpty(responseContent)) {
             try {
-                //JSONArray weatherResult = new J
+
                 Weather weather = new Weather();
                 JSONObject weahterJson = new JSONObject(responseContent).
                         getJSONObject("result").getJSONObject("result");
@@ -86,7 +86,6 @@ public class Utility {
             suggestions.add(suggestion);
 
         }
-        //Log.i(TAG, suggestions.size()+"");
         return suggestions;
     }
 
@@ -104,7 +103,7 @@ public class Utility {
             hourForecast.time = time;
             hourForecasts.add(hourForecast);
         }
-        //Log.i(TAG, hourForecasts.size()+"");
+
         return hourForecasts;
     }
 
@@ -129,7 +128,7 @@ public class Utility {
             dailyForecasts.add(dailyForecast);
 
         }
-        //Log.i(TAG, dailyForecasts.size()+"");
+
         return dailyForecasts;
     }
 
@@ -154,7 +153,6 @@ public class Utility {
         basic.humidity = humidity;
         basic.pressure = pressure;
         basic.weather = weather;
-        //Log.i(TAG, basic.toString());
         return basic;
     }
 }
