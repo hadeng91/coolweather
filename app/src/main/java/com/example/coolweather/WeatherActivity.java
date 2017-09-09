@@ -45,7 +45,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -181,9 +180,21 @@ public class WeatherActivity extends AppCompatActivity implements View.OnClickLi
         }*/
         //loadBingPic();
         //fortest
-        requestWeather(mCity);
+        //requestWeather(mCity);
 
         
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent = getIntent();
+        String city = intent.getStringExtra("city");
+        if (city == null) {
+            requestWeather(mCity);
+        } else {
+            requestWeather(city);
+        }
     }
 
     private void loadBingPic() {

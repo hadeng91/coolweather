@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -63,6 +64,16 @@ public class CityManagerActivity extends AppCompatActivity implements View.OnCli
             }
             adapter.notifyDataSetChanged();
             citylistView.setSelection(0);
+            citylistView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    String city = cityList.get(i);
+                    Intent intent = new Intent(CityManagerActivity.this, WeatherActivity.class);
+                    intent.putExtra("city", city);
+                    startActivity(intent);
+                    //finish();
+                }
+            });
         }
         addCity.setOnClickListener(this);
     }
