@@ -8,15 +8,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.Toast;
 
+import com.example.coolweather.adapter.CityListAdapter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 public class CityManagerActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -24,9 +23,9 @@ public class CityManagerActivity extends AppCompatActivity implements View.OnCli
 
     private Button addCity;
 
-    private ListView citylistView;
+    private CityListView citylistView;
 
-    private ArrayAdapter<String> adapter;
+    private CityListAdapter adapter;
 
     private List<String> cityList = new ArrayList<>();
 
@@ -36,9 +35,8 @@ public class CityManagerActivity extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_city_manager);
-        citylistView = (ListView) findViewById(R.id.city_list);
-        adapter = new ArrayAdapter<String>(CityManagerActivity.this,
-                android.R.layout.simple_list_item_1, cityList);
+        citylistView = (CityListView) findViewById(R.id.city_list);
+        adapter = new CityListAdapter(this, 0, cityList);
         citylistView.setAdapter(adapter);
         addCity = (Button) findViewById(R.id.add_city);
 
@@ -47,7 +45,7 @@ public class CityManagerActivity extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         citySet = new HashSet<String>(preferences.getStringSet(
                 "cities", new HashSet<String>()
         ));
@@ -72,6 +70,20 @@ public class CityManagerActivity extends AppCompatActivity implements View.OnCli
                     intent.putExtra("city", city);
                     startActivity(intent);
                     //finish();
+                    
+                }
+            });
+            citylistView.setDelButtonClickListener(new CityListView.DelButtonClickListener() {
+                @Override
+                public void onDelete(int index) {
+                    String removeCity = cityList.remove(index);
+                    citySet.remove(removeCity);
+                    HashSet<String> resultCitySet = new HashSet<String>(citySet);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putStringSet("cities", resultCitySet);
+                    editor.apply();
+                    Log.d(TAG, cityList.toString());
+                    adapter.notifyDataSetChanged();
                 }
             });
         }
